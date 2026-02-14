@@ -1,10 +1,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Category, OrderData, OrderStatus } from '../types';
-import { SUB_CATEGORIES } from '../constants';
-import { orderService } from '../services/orderService';
+import { Category, OrderData, OrderStatus } from '../types.ts';
+import { SUB_CATEGORIES } from '../constants.ts';
+import { orderService } from '../services/orderService.ts';
 import { Send, Sparkles, CheckCircle2, ChevronRight, ChevronLeft, MessageCircle, Upload, Briefcase, User, PenTool, CheckCircle, X, File } from 'lucide-react';
-import { getProjectBriefSuggestions } from '../services/geminiService';
+import { getProjectBriefSuggestions } from '../services/geminiService.ts';
 
 interface OrderFormProps {
   isOpen: boolean;
@@ -92,10 +92,33 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
     
     setIsSubmitting(true);
     setTimeout(() => {
+      // Note: Data is saved to localStorage (browser-specific)
       orderService.saveOrder(formData);
       setIsSubmitting(false);
       setIsSuccess(true);
-    }, 2000);
+    }, 1500);
+  };
+
+  const generateWhatsAppUrl = () => {
+    const adminPhone = "YOUR_WHATSAPP_NUMBER_HERE"; // Replace with your actual WhatsApp number
+    const message = `*NEW ORDER RECEIVED - DESIGNGOLD*%0A%0A` +
+      `*Client Info:*%0A` +
+      `- Name: ${formData.name}%0A` +
+      `- Email: ${formData.email}%0A` +
+      `- WhatsApp: ${formData.whatsapp}%0A` +
+      `- Brand: ${formData.companyName || 'N/A'}%0A%0A` +
+      `*Project Info:*%0A` +
+      `- Title: ${formData.projectTitle}%0A` +
+      `- Service: ${formData.category} (${formData.subCategory})%0A` +
+      `- Deadline: ${formData.deadline}%0A` +
+      `- Budget: ${formData.budgetRange || 'Flexible'}%0A%0A` +
+      `*Project Brief:*%0A${formData.details}%0A%0A` +
+      `*Design Specs:*%0A` +
+      `- Size: ${formData.preferredSize || 'Standard'}%0A` +
+      `- Colors: ${formData.colorPreference || 'Open'}%0A` +
+      `- Content: ${formData.textContent || 'See attachments'}`;
+    
+    return `https://wa.me/your_number_here?text=${message}`; // Replace with your number in format: 88017XXXXXXXX
   };
 
   const nextStep = () => {
@@ -131,59 +154,68 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="p-8 md:p-12">
-          <div className="flex justify-between items-center relative max-w-lg mx-auto mb-16">
-            <div className="absolute top-1/2 left-0 w-full h-[2px] bg-neutral-800 -translate-y-1/2 z-0"></div>
-            <div 
-              className="absolute top-1/2 left-0 h-[2px] bg-[#d4af37] -translate-y-1/2 z-0 transition-all duration-500"
-              style={{ width: `${((step - 1) / (stepsInfo.length - 1)) * 100}%` }}
-            ></div>
-            
-            {stepsInfo.map((s, i) => {
-              const Icon = s.icon;
-              const isActive = step >= i + 1;
-              const isCurrent = step === i + 1;
-              return (
-                <div key={i} className="relative z-10 flex flex-col items-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border-2 ${
-                    isCurrent ? 'bg-black border-[#d4af37] text-[#d4af37] scale-110 shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 
-                    isActive ? 'bg-[#d4af37] border-[#d4af37] text-black' : 
-                    'bg-neutral-900 border-neutral-800 text-neutral-600'
-                  }`}>
-                    <Icon className="w-4 h-4" />
+          {!isSuccess && (
+            <div className="flex justify-between items-center relative max-w-lg mx-auto mb-16">
+              <div className="absolute top-1/2 left-0 w-full h-[2px] bg-neutral-800 -translate-y-1/2 z-0"></div>
+              <div 
+                className="absolute top-1/2 left-0 h-[2px] bg-[#d4af37] -translate-y-1/2 z-0 transition-all duration-500"
+                style={{ width: `${((step - 1) / (stepsInfo.length - 1)) * 100}%` }}
+              ></div>
+              
+              {stepsInfo.map((s, i) => {
+                const Icon = s.icon;
+                const isActive = step >= i + 1;
+                const isCurrent = step === i + 1;
+                return (
+                  <div key={i} className="relative z-10 flex flex-col items-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border-2 ${
+                      isCurrent ? 'bg-black border-[#d4af37] text-[#d4af37] scale-110 shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 
+                      isActive ? 'bg-[#d4af37] border-[#d4af37] text-black' : 
+                      'bg-neutral-900 border-neutral-800 text-neutral-600'
+                    }`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className={`absolute -bottom-6 text-[8px] uppercase tracking-widest font-black whitespace-nowrap transition-colors ${isActive ? 'text-[#d4af37]' : 'text-neutral-600'}`}>
+                      {s.title}
+                    </span>
                   </div>
-                  <span className={`absolute -bottom-6 text-[8px] uppercase tracking-widest font-black whitespace-nowrap transition-colors ${isActive ? 'text-[#d4af37]' : 'text-neutral-600'}`}>
-                    {s.title}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           {isSuccess ? (
             <div className="text-center py-10 animate-fadeIn">
-              <div className="w-20 h-20 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-full flex items-center justify-center mx-auto mb-8">
-                <CheckCircle2 className="w-10 h-10 text-[#d4af37]" />
+              <div className="w-24 h-24 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
+                <CheckCircle2 className="w-12 h-12 text-[#d4af37]" />
               </div>
-              <h4 className="text-3xl font-serif italic mb-4">Request Transmitted!</h4>
+              <h4 className="text-3xl font-serif italic mb-4">অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!</h4>
               <p className="text-gray-400 mb-10 max-w-sm mx-auto leading-relaxed text-sm">
-                Your project requirements have been successfully received. I'll reach out via WhatsApp/Email within 24 hours.
+                আপনার অর্ডারের বিস্তারিত এখন আমাদের WhatsApp-এ পাঠিয়ে দিন যাতে আমরা সাথে সাথে কাজ শুরু করতে পারি।
               </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
+              
+              <div className="space-y-4 max-w-md mx-auto">
+                <a 
+                  href={generateWhatsAppUrl()} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-6 bg-green-600 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl flex items-center justify-center space-x-4 hover:bg-green-500 hover:scale-[1.02] transition-all shadow-[0_20px_40px_rgba(22,163,74,0.3)]"
+                >
+                  <MessageCircle className="w-6 h-6" />
+                  <span>Notify via WhatsApp (Admin)</span>
+                </a>
+                
                 <button 
                   onClick={onClose}
-                  className="px-10 py-4 bg-[#d4af37] text-black font-black uppercase tracking-widest text-[10px] rounded-full"
+                  className="w-full py-4 text-gray-500 text-[10px] uppercase font-black tracking-widest hover:text-white transition-colors"
                 >
-                  Close Modal
+                  Close & Return to Site
                 </button>
-                <a 
-                  href={`https://wa.me/${formData.whatsapp.replace(/\D/g, '')}?text=Hi, I just placed an order for ${formData.projectTitle}`} 
-                  target="_blank"
-                  className="px-10 py-4 border border-white/10 text-white font-bold uppercase tracking-widest text-[10px] rounded-full flex items-center justify-center space-x-2"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>WhatsApp Chat</span>
-                </a>
               </div>
+              
+              <p className="mt-8 text-[9px] text-gray-600 uppercase tracking-widest leading-relaxed">
+                Note: Local data saved successfully. <br/> Cross-device sync requires WhatsApp notification.
+              </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-8">
@@ -199,7 +231,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
                   </div>
                   <div className="space-y-3">
                     <label className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-black ml-1">WhatsApp Number *</label>
-                    <input required name="whatsapp" type="tel" value={formData.whatsapp} onChange={handleInputChange} className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 focus:border-[#d4af37] transition-all outline-none" placeholder="+1..." />
+                    <input required name="whatsapp" type="tel" value={formData.whatsapp} onChange={handleInputChange} className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 focus:border-[#d4af37] transition-all outline-none" placeholder="+880..." />
                   </div>
                   <div className="space-y-3">
                     <label className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-black ml-1">Company/Brand Name (Optional)</label>
@@ -320,20 +352,16 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
 
                   <div className="pt-4 space-y-4">
                     <button 
+                      type="submit"
                       disabled={!formData.agreedToTerms || isSubmitting}
                       className="w-full py-6 bg-[#d4af37] text-black font-black uppercase tracking-[0.4em] text-xs rounded-2xl hover:bg-white hover:scale-[1.02] transition-all disabled:opacity-20 shadow-[0_15px_35px_rgba(212,175,55,0.2)] flex items-center justify-center space-x-4"
                     >
                       {isSubmitting ? <Sparkles className="animate-spin w-5 h-5" /> : <Send className="w-5 h-5" />}
                       <span>{isSubmitting ? 'SENDING...' : 'PLACE ORDER'}</span>
                     </button>
-                    <a 
-                      href={`https://wa.me/${formData.whatsapp.replace(/\D/g, '')}`} 
-                      target="_blank"
-                      className="w-full py-5 border border-white/5 bg-neutral-900/50 text-white font-bold uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center space-x-3 hover:bg-[#d4af37] hover:text-black transition-all"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      <span>Or Contact via WhatsApp</span>
-                    </a>
+                    <p className="text-center text-[8px] text-gray-600 uppercase tracking-widest font-black">
+                      Note: You will be asked to send a WhatsApp message to finalize.
+                    </p>
                   </div>
                 </div>
               )}
