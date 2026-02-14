@@ -8,7 +8,7 @@ import { SUB_CATEGORIES } from '../constants';
 import { 
   Crown, LogOut, Package, Trash2, Search, ArrowLeft,
   CheckCircle, Plus, Image as ImageIcon,
-  Download, Briefcase, Edit3, AlertCircle, Send, Eye, X, ExternalLink, Copy, Mail, Phone, Calendar, Hash, User, Smartphone
+  Download, Briefcase, Edit3, AlertCircle, Send, Eye, X, ExternalLink, Copy, Mail, Phone, Calendar, Hash, User, Smartphone, UploadCloud, FileText, Type
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -28,7 +28,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projectForm, setProjectForm] = useState<Omit<Project, 'id'>>({
-    title: '', category: Category.Logo, subCategory: SUB_CATEGORIES[Category.Logo][0], description: '', imageUrl: ''
+    title: '', 
+    category: Category.Logo, 
+    subCategory: SUB_CATEGORIES[Category.Logo][0], 
+    description: '', 
+    imageUrl: ''
   });
 
   useEffect(() => {
@@ -86,9 +90,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
   const handleProjectSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!projectForm.imageUrl) {
+      showFeedback('Please select a project image', 'error');
+      return;
+    }
     try {
       portfolioService.addProject(projectForm);
-      showFeedback('Project published successfully');
+      showFeedback('Project published successfully to studio gallery');
       setIsModalOpen(false);
       setProjectForm({
         title: '',
@@ -109,6 +117,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   ), [orders, searchQuery]);
 
   const filteredProjects = useMemo(() => projects.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase())), [projects, searchQuery]);
+
+  // Derived sub-categories based on selected project category
+  const availableSubCategories = useMemo(() => SUB_CATEGORIES[projectForm.category], [projectForm.category]);
 
   return (
     <div className="min-h-screen bg-[#080808] text-white flex flex-col md:flex-row font-sans">
@@ -180,7 +191,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-700" />
             <input 
               type="text" 
-              placeholder="Search by title or name..." 
+              placeholder="Search items..." 
               value={searchQuery} 
               onChange={(e) => setSearchQuery(e.target.value)} 
               className="w-full bg-neutral-900/50 border border-white/10 rounded-2xl pl-16 pr-8 py-5 text-sm outline-none focus:border-[#d4af37] transition-all placeholder:text-gray-800" 
@@ -427,46 +438,146 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 md:p-10">
           <div className="absolute inset-0 bg-black/98 backdrop-blur-3xl" onClick={() => setIsModalOpen(false)}></div>
-          <div className="relative w-full max-w-2xl bg-[#0f0f0f] border border-white/10 rounded-[3rem] p-12 md:p-16 animate-modalPop shadow-[0_50px_100px_rgba(0,0,0,0.9)]">
-            <h3 className="text-4xl font-serif italic mb-10 gold-text">Archive New Asset</h3>
-            <form onSubmit={handleProjectSubmit} className="space-y-8">
-              <div className="space-y-3">
-                <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 ml-2">Project Label</label>
-                <input required type="text" value={projectForm.title} onChange={e => setProjectForm({...projectForm, title: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl px-8 py-5 outline-none focus:border-[#d4af37] transition-all text-sm" placeholder="e.g. Neo-Branding Identity" />
+          
+          <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-[#0f0f0f] border border-white/10 rounded-[3rem] p-8 md:p-16 animate-modalPop shadow-[0_50px_100px_rgba(0,0,0,0.9)] custom-scrollbar">
+            <div className="flex justify-between items-start mb-12">
+              <div>
+                <span className="text-[#d4af37] uppercase text-[10px] font-black tracking-[0.4em] block mb-2">Studio Archive</span>
+                <h3 className="text-4xl md:text-5xl font-serif italic gold-text">Publish New Asset</h3>
               </div>
-              
-              <div className="space-y-3">
-                <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 ml-2">Creative Discipline</label>
-                <select value={projectForm.category} onChange={e => setProjectForm({...projectForm, category: e.target.value as Category})} className="w-full bg-black border border-white/10 rounded-2xl px-8 py-5 outline-none focus:border-[#d4af37] transition-all text-sm appearance-none">
-                  {Object.values(Category).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-              </div>
+              <button onClick={() => setIsModalOpen(false)} className="p-4 hover:bg-white/5 rounded-full transition-colors">
+                <X className="w-8 h-8 text-gray-600 hover:text-white" />
+              </button>
+            </div>
 
-              <div className="space-y-3">
-                <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 ml-2">Asset Source</label>
-                <div className="relative w-full py-20 bg-black border border-white/10 rounded-[2rem] flex flex-col items-center justify-center space-y-4 cursor-pointer hover:border-[#d4af37] group transition-all">
-                  <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-[#d4af37]/10 transition-colors">
-                    <ImageIcon className="w-8 h-8 text-gray-500 group-hover:text-[#d4af37]" />
+            <form onSubmit={handleProjectSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+              {/* Left Column: Details */}
+              <div className="lg:col-span-7 space-y-10">
+                <div className="space-y-4">
+                  <label className="flex items-center gap-3 text-[10px] uppercase font-black tracking-widest text-gray-500 ml-2">
+                    <Type className="w-4 h-4" /> Project Title *
+                  </label>
+                  <input 
+                    required 
+                    type="text" 
+                    value={projectForm.title} 
+                    onChange={e => setProjectForm({...projectForm, title: e.target.value})} 
+                    className="w-full bg-black border border-white/10 rounded-2xl px-8 py-6 outline-none focus:border-[#d4af37] transition-all text-sm placeholder:text-gray-800" 
+                    placeholder="e.g. Neo-Branding Identity" 
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <label className="flex items-center gap-3 text-[10px] uppercase font-black tracking-widest text-gray-500 ml-2">
+                      <Hash className="w-4 h-4" /> Discipline *
+                    </label>
+                    <select 
+                      value={projectForm.category} 
+                      onChange={e => {
+                        const newCat = e.target.value as Category;
+                        setProjectForm({
+                          ...projectForm, 
+                          category: newCat,
+                          subCategory: SUB_CATEGORIES[newCat][0]
+                        });
+                      }} 
+                      className="w-full bg-black border border-white/10 rounded-2xl px-8 py-6 outline-none focus:border-[#d4af37] transition-all text-sm appearance-none cursor-pointer"
+                    >
+                      {Object.values(Category).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    </select>
                   </div>
-                  <span className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400">
-                    {projectForm.imageUrl ? 'Master File Synced' : 'Select Raw Asset'}
-                  </span>
-                  <input type="file" required className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => setProjectForm({...projectForm, imageUrl: reader.result as string});
-                      reader.readAsDataURL(file);
-                    }
-                  }} />
+
+                  <div className="space-y-4">
+                    <label className="flex items-center gap-3 text-[10px] uppercase font-black tracking-widest text-gray-500 ml-2">
+                      <Plus className="w-4 h-4" /> Specialization
+                    </label>
+                    <select 
+                      value={projectForm.subCategory} 
+                      onChange={e => setProjectForm({...projectForm, subCategory: e.target.value})} 
+                      className="w-full bg-black border border-white/10 rounded-2xl px-8 py-6 outline-none focus:border-[#d4af37] transition-all text-sm appearance-none cursor-pointer"
+                    >
+                      {availableSubCategories.map(sub => <option key={sub} value={sub}>{sub}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="flex items-center gap-3 text-[10px] uppercase font-black tracking-widest text-gray-500 ml-2">
+                    <FileText className="w-4 h-4" /> Project Narrative
+                  </label>
+                  <textarea 
+                    value={projectForm.description} 
+                    onChange={e => setProjectForm({...projectForm, description: e.target.value})} 
+                    rows={6}
+                    className="w-full bg-black border border-white/10 rounded-[2rem] px-8 py-8 outline-none focus:border-[#d4af37] transition-all text-sm resize-none placeholder:text-gray-800 leading-relaxed" 
+                    placeholder="Briefly describe the visual strategy and outcome of this project..." 
+                  />
                 </div>
               </div>
 
-              <button type="submit" className="w-full py-7 bg-[#d4af37] text-black font-black uppercase text-xs tracking-[0.4em] rounded-2xl hover:bg-white transition-all shadow-2xl">
-                Publish to Studio Gallery
-              </button>
+              {/* Right Column: Asset Upload & Preview */}
+              <div className="lg:col-span-5 space-y-10">
+                <div className="space-y-4">
+                  <label className="flex items-center gap-3 text-[10px] uppercase font-black tracking-widest text-gray-500 ml-2">
+                    <ImageIcon className="w-4 h-4" /> Visual Asset *
+                  </label>
+                  
+                  <div className="relative group rounded-[3rem] overflow-hidden border-2 border-dashed border-white/10 aspect-[4/5] bg-black hover:border-[#d4af37] transition-all flex flex-col items-center justify-center p-4">
+                    {projectForm.imageUrl ? (
+                      <div className="relative w-full h-full group/preview">
+                        <img 
+                          src={projectForm.imageUrl} 
+                          className="w-full h-full object-contain rounded-2xl animate-fadeIn" 
+                          alt="Upload Preview" 
+                        />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-all flex items-center justify-center backdrop-blur-sm">
+                           <button 
+                             type="button" 
+                             onClick={() => setProjectForm({...projectForm, imageUrl: ''})}
+                             className="p-5 bg-red-600 text-white rounded-full hover:scale-110 transition-transform shadow-2xl"
+                           >
+                             <Trash2 className="w-8 h-8" />
+                           </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center space-y-6">
+                        <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center group-hover:bg-[#d4af37]/10 transition-colors">
+                          <UploadCloud className="w-10 h-10 text-gray-600 group-hover:text-[#d4af37]" />
+                        </div>
+                        <div className="text-center px-6">
+                          <p className="text-xs font-black uppercase tracking-[0.3em] text-gray-400 group-hover:text-white">Upload Raw Asset</p>
+                          <p className="text-[10px] text-gray-700 font-bold mt-2 uppercase">High-Res PNG or JPG preferred</p>
+                        </div>
+                      </div>
+                    )}
+                    <input 
+                      type="file" 
+                      required={!projectForm.imageUrl}
+                      className="absolute inset-0 opacity-0 cursor-pointer" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => setProjectForm({...projectForm, imageUrl: reader.result as string});
+                          reader.readAsDataURL(file);
+                        }
+                      }} 
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="w-full py-8 bg-[#d4af37] text-black font-black uppercase text-xs tracking-[0.4em] rounded-[2rem] hover:bg-white transition-all shadow-[0_20px_40px_rgba(212,175,55,0.2)] hover:scale-[1.02] flex items-center justify-center gap-4"
+                >
+                  <Send className="w-4 h-4" />
+                  Publish To Studio
+                </button>
+              </div>
             </form>
           </div>
         </div>
