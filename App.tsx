@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Portfolio from './components/Portfolio';
-import OrderForm from './components/OrderForm';
-import About from './components/About';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
-import AdminLogin from './components/AdminLogin';
-import AdminDashboard from './components/AdminDashboard';
+import Navbar from './components/Navbar.tsx';
+import Hero from './components/Hero.tsx';
+import Portfolio from './components/Portfolio.tsx';
+import OrderForm from './components/OrderForm.tsx';
+import About from './components/About.tsx';
+import Contact from './components/Contact.tsx';
+import Footer from './components/Footer.tsx';
+import AdminLogin from './components/AdminLogin.tsx';
+import AdminDashboard from './components/AdminDashboard.tsx';
 
 type View = 'portfolio' | 'admin-login' | 'admin-dashboard';
 

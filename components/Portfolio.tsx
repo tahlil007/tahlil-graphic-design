@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Category, Project } from '../types';
-import { portfolioService } from '../services/portfolioService';
+import { Category, Project } from '../types.ts';
+import { portfolioService } from '../services/portfolioService.ts';
 import { ExternalLink, Plus, Search } from 'lucide-react';
 
 const Portfolio: React.FC = () => {
