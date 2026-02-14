@@ -12,8 +12,7 @@ interface OrderFormProps {
 }
 
 const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<Omit<OrderData, 'id' | 'createdAt' | 'status' | 'read'>>({
+  const initialFormData = {
     name: '',
     email: '',
     whatsapp: '',
@@ -29,11 +28,12 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
     textContent: '',
     referenceFile: undefined,
     agreedToTerms: false
-  });
+  };
 
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState<Omit<OrderData, 'id' | 'createdAt' | 'status' | 'read'>>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [aiBrief, setAiBrief] = useState<string | null>(null);
   const [isLoadingAi, setIsLoadingAi] = useState(false);
 
   useEffect(() => {
@@ -46,6 +46,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   const subCategories = useMemo(() => SUB_CATEGORIES[formData.category], [formData.category]);
+
+  const resetForm = () => {
+    setStep(1);
+    setFormData(initialFormData);
+    setIsSuccess(false);
+    setIsSubmitting(false);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as any;
@@ -78,7 +85,9 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
     }
     setIsLoadingAi(true);
     const brief = await getProjectBriefSuggestions(`${formData.category} - ${formData.projectTitle}`);
-    setAiBrief(brief || "Could not generate suggestions.");
+    if (brief) {
+      setFormData(prev => ({ ...prev, details: prev.details ? `${prev.details}\n\nAI Suggestions:\n${brief}` : brief }));
+    }
     setIsLoadingAi(false);
   };
 
@@ -95,8 +104,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
   const nextStep = () => setStep(s => Math.min(s + 1, 4));
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
+  const handleBackToOrder = () => {
+    resetForm();
+  };
+
   const handleViewPortfolio = () => {
     onClose();
+    resetForm();
     window.location.hash = '#portfolio';
   };
 
@@ -104,7 +118,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose}></div>
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => { if(isSuccess) resetForm(); onClose(); }}></div>
       
       <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[#0f0f0f] border border-white/10 rounded-[2rem] shadow-2xl animate-modalPop custom-scrollbar">
         <div className="sticky top-0 z-20 flex justify-between items-center p-8 bg-[#0f0f0f]/80 backdrop-blur-sm border-b border-white/5">
@@ -112,7 +126,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
             <h4 className="text-[#d4af37] uppercase tracking-[0.4em] text-[10px] font-black mb-1">Commission Request</h4>
             <h3 className="text-2xl font-serif italic">Launch Your Project</h3>
           </div>
-          <button onClick={onClose} className="p-3 hover:bg-white/5 rounded-full transition-colors">
+          <button onClick={() => { if(isSuccess) resetForm(); onClose(); }} className="p-3 hover:bg-white/5 rounded-full transition-colors">
             <X className="w-6 h-6 text-gray-500 hover:text-white" />
           </button>
         </div>
@@ -130,7 +144,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6 max-w-lg mx-auto">
                 <button 
-                  onClick={onClose}
+                  onClick={handleBackToOrder}
                   className="w-full sm:flex-1 py-5 bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl flex items-center justify-center space-x-3 hover:bg-white/10 transition-all"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -183,8 +197,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                        <label className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-black">Project Details *</label>
-                       <button type="button" onClick={handleAiHelp} className="text-[8px] font-black text-[#d4af37] flex items-center space-x-1">
-                         <Sparkles className="w-3 h-3" /> <span>AI HELP</span>
+                       <button type="button" onClick={handleAiHelp} disabled={isLoadingAi} className="text-[8px] font-black text-[#d4af37] flex items-center space-x-1 hover:text-white transition-colors disabled:opacity-50">
+                         <Sparkles className={`w-3 h-3 ${isLoadingAi ? 'animate-spin' : ''}`} /> <span>{isLoadingAi ? 'GENERATING...' : 'AI HELP'}</span>
                        </button>
                     </div>
                     <textarea required name="details" value={formData.details} onChange={handleInputChange} rows={3} className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 focus:border-[#d4af37] transition-all outline-none resize-none" />
@@ -206,7 +220,9 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
                   </div>
                   <div className="p-10 border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center space-y-3 hover:border-[#d4af37] transition-all cursor-pointer bg-white/2 relative">
                     <Upload className="w-6 h-6 text-gray-500" />
-                    <p className="text-[10px] uppercase font-black tracking-widest">Upload Reference File</p>
+                    <p className="text-[10px] uppercase font-black tracking-widest">
+                      {formData.referenceFile ? 'File Selected' : 'Upload Reference File'}
+                    </p>
                     <input type="file" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
                   </div>
                 </div>
