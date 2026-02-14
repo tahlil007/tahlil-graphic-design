@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { orderService } from '../services/orderService';
-import { portfolioService } from '../services/portfolioService';
-import { firebaseService } from '../services/firebaseService';
-import { OrderData, OrderStatus, Category, Project } from '../types';
-import { SUB_CATEGORIES } from '../constants';
+import { orderService } from '../services/orderService.ts';
+import { portfolioService } from '../services/portfolioService.ts';
+import { firebaseService } from '../services/firebaseService.ts';
+import { OrderData, OrderStatus, Category, Project } from '../types.ts';
+import { SUB_CATEGORIES } from '../constants.ts';
 import { 
   Crown, LogOut, Package, Trash2, Search, ArrowLeft,
   CheckCircle, Plus, Image as ImageIcon,
@@ -30,7 +30,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [projectForm, setProjectForm] = useState<Omit<Project, 'id'>>({
     title: '', 
     category: Category.Logo, 
-    subCategory: SUB_CATEGORIES[Category.Logo][0], 
+    subCategory: SUB_CATEGORIES[Category.Logo]?.[0] || '', 
     description: '', 
     imageUrl: ''
   });
@@ -101,7 +101,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       setProjectForm({
         title: '',
         category: Category.Logo,
-        subCategory: SUB_CATEGORIES[Category.Logo][0],
+        subCategory: SUB_CATEGORIES[Category.Logo]?.[0] || '',
         description: '',
         imageUrl: ''
       });
@@ -117,18 +117,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   ), [orders, searchQuery]);
 
   const filteredProjects = useMemo(() => projects.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase())), [projects, searchQuery]);
-  const availableSubCategories = useMemo(() => SUB_CATEGORIES[projectForm.category], [projectForm.category]);
+  const availableSubCategories = useMemo(() => SUB_CATEGORIES[projectForm.category] || [], [projectForm.category]);
 
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col md:flex-row font-sans overflow-hidden">
-      {/* Notification Toast */}
       {notification && (
         <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[1000] animate-slideDown bg-[#d4af37] text-black px-8 py-4 rounded-full shadow-2xl font-black text-[10px] uppercase tracking-widest flex items-center space-x-3 border border-white/20">
           <CheckCircle className="w-4 h-4" /> <span>{notification.message}</span>
         </div>
       )}
 
-      {/* Full Asset Viewer */}
       {fullImagePreview && (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center p-6 animate-fadeIn">
           <div className="absolute inset-0 bg-black/98 backdrop-blur-3xl" onClick={() => setFullImagePreview(null)}></div>
@@ -143,7 +141,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
       )}
 
-      {/* Side Menu */}
       <div className="w-full md:w-80 bg-black border-r border-white/5 p-10 flex flex-col shrink-0">
         <div className="flex items-center space-x-4 mb-16">
           <div className="w-12 h-12 bg-[#d4af37]/10 rounded-2xl flex items-center justify-center border border-[#d4af37]/20">
@@ -177,7 +174,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
       </div>
 
-      {/* Main Content Area */}
       <div className="flex-1 p-8 md:p-14 overflow-y-auto max-h-screen bg-[#050505] custom-scrollbar">
         <header className="flex flex-col xl:flex-row justify-between xl:items-center mb-16 gap-8">
           <div>
@@ -198,7 +194,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
         {activeTab === 'orders' ? (
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-14 items-start">
-            {/* List Column */}
             <div className="xl:col-span-5 space-y-6 max-h-[70vh] overflow-y-auto pr-4 custom-scrollbar">
               {filteredOrders.length === 0 ? (
                 <div className="py-24 text-center border border-dashed border-white/5 rounded-[3rem]">
@@ -225,7 +220,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               )}
             </div>
 
-            {/* Detail Column */}
             <div className="xl:col-span-7">
               {selectedOrder ? (
                 <div className="bg-neutral-900 border border-white/10 rounded-[3rem] p-10 md:p-14 animate-fadeIn shadow-2xl space-y-12">
@@ -338,7 +332,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </div>
           </div>
         ) : (
-          /* Portfolio Tab UI */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
              <button onClick={() => setIsModalOpen(true)} className="aspect-[4/5] border-2 border-dashed border-white/10 rounded-[3rem] flex flex-col items-center justify-center hover:border-[#d4af37] transition-all group bg-white/2 hover:bg-[#d4af37]/5">
                 <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-[#d4af37] group-hover:text-black transition-all mb-6">
@@ -362,7 +355,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         )}
       </div>
 
-      {/* Modal: Add Portfolio Project */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/98 backdrop-blur-3xl" onClick={() => setIsModalOpen(false)}></div>
@@ -386,7 +378,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Discipline</label>
                      <select value={projectForm.category} onChange={e => {
                        const newCat = e.target.value as Category;
-                       setProjectForm({...projectForm, category: newCat, subCategory: SUB_CATEGORIES[newCat][0]});
+                       setProjectForm({...projectForm, category: newCat, subCategory: SUB_CATEGORIES[newCat]?.[0] || ''});
                      }} className="w-full bg-black border border-white/10 rounded-2xl px-8 py-6 outline-none focus:border-[#d4af37] transition-all text-sm appearance-none cursor-pointer">
                         {Object.values(Category).map(cat => <option key={cat} value={cat}>{cat}</option>)}
                      </select>
@@ -394,7 +386,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                    <div className="space-y-4">
                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Specialization</label>
                      <select value={projectForm.subCategory} onChange={e => setProjectForm({...projectForm, subCategory: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl px-8 py-6 outline-none focus:border-[#d4af37] transition-all text-sm appearance-none cursor-pointer">
-                        {availableSubCategories.map(sub => <option key={sub} value={sub}>{sub}</option>)}
+                        {(SUB_CATEGORIES[projectForm.category] || []).map(sub => <option key={sub} value={sub}>{sub}</option>)}
                      </select>
                    </div>
                 </div>
