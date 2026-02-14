@@ -27,7 +27,7 @@ const About: React.FC = () => {
               />
             </div>
             <div className="absolute -bottom-10 -right-10 bg-[#d4af37] p-8 hidden md:block">
-              <h4 className="text-black font-black text-4xl leading-none">DESIGN<br/>GOLD</h4>
+              <h4 className="text-black font-black text-2xl leading-none">TAHLIL<br/>DESIGN GOLD</h4>
             </div>
           </div>
 

@@ -8,11 +8,11 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="flex items-center space-x-2">
           <Crown className="w-6 h-6 text-[#d4af37]" />
-          <span className="text-lg font-bold tracking-tighter uppercase font-serif italic gold-text">DesignGold</span>
+          <span className="text-lg font-bold tracking-tighter uppercase font-serif italic gold-text">Tahlil DesignGold</span>
         </div>
         
         <p className="text-gray-500 text-sm">
-          © {new Date().getFullYear()} DesignGold Portfolio. All Rights Reserved.
+          © {new Date().getFullYear()} Tahlil DesignGold Portfolio. All Rights Reserved.
         </p>
         
         <div className="flex space-x-6 text-xs uppercase tracking-widest text-gray-500">

@@ -30,7 +30,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOrderClick }) => {
       <div className="container mx-auto px-6 flex justify-between items-center">
         <a href="#home" className="flex items-center space-x-2">
           <Crown className="w-8 h-8 text-[#d4af37]" />
-          <span className="text-xl font-bold tracking-tighter uppercase font-serif italic gold-text">DesignGold</span>
+          <span className="text-xl font-bold tracking-tighter uppercase font-serif italic gold-text">Tahlil DesignGold</span>
         </a>
 
         {/* Desktop Links */}

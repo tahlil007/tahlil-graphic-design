@@ -100,9 +100,9 @@ const App: React.FC = () => {
       <footer className="py-12 bg-black border-t border-white/5">
         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold tracking-tighter uppercase font-serif italic gold-text">DesignGold</span>
+            <span className="text-lg font-bold tracking-tighter uppercase font-serif italic gold-text">Tahlil DesignGold</span>
           </div>
-          <p className="text-gray-500 text-xs">© {new Date().getFullYear()} DesignGold Portfolio. All Rights Reserved.</p>
+          <p className="text-gray-500 text-xs">© {new Date().getFullYear()} Tahlil DesignGold Portfolio. All Rights Reserved.</p>
           <div className="flex space-x-6 text-[10px] uppercase tracking-widest text-gray-600">
             <button onClick={handleAdminAccess} className="hover:text-[#d4af37]">Admin Access</button>
             <a href="#" className="hover:text-[#d4af37]">Privacy</a>
