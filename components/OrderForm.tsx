@@ -3,8 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Category, OrderData, OrderStatus } from '../types.ts';
 import { SUB_CATEGORIES } from '../constants.ts';
 import { orderService } from '../services/orderService.ts';
-// Added Briefcase to imports to resolve "Cannot find name 'Briefcase'" error
-import { Send, Sparkles, CheckCircle2, ChevronRight, MessageCircle, Upload, X, ArrowLeft, LayoutGrid, Mail, User, Phone, Briefcase } from 'lucide-react';
+import { Send, Sparkles, CheckCircle2, ChevronRight, MessageCircle, Upload, X, ArrowLeft, LayoutGrid, Mail, User, Phone, Briefcase, PlusCircle } from 'lucide-react';
 import { getProjectBriefSuggestions } from '../services/geminiService.ts';
 
 interface OrderFormProps {
@@ -130,23 +129,23 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
               </div>
               <h4 className="text-4xl font-serif italic mb-6 gold-text">Order Confirmed!</h4>
               <p className="text-white text-xl md:text-2xl font-medium mb-12 max-w-xl mx-auto leading-relaxed">
-                আমাদের প্রতিনিধি আপনার সাথে অতি দ্রুত যোগাযোগ করবে।
+                আপনার অর্ডারটি সফলভাবে আমাদের সিস্টেমে জমা হয়েছে। আমরা শীঘ্রই যোগাযোগ করব।
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 max-w-lg mx-auto">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 max-w-xl mx-auto">
                 <button 
                   onClick={resetForm}
-                  className="w-full sm:flex-1 py-5 bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl flex items-center justify-center space-x-3 hover:bg-white/10 transition-all"
+                  className="w-full sm:flex-1 py-5 bg-[#d4af37] text-black font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl flex items-center justify-center space-x-3 hover:bg-white transition-all shadow-[0_15px_30px_rgba(212,175,55,0.2)]"
                 >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>ব্যাক</span>
+                  <PlusCircle className="w-5 h-5" />
+                  <span>নতুন অর্ডার করুন</span>
                 </button>
                 <button 
                   onClick={() => { onClose(); resetForm(); window.location.hash = '#portfolio'; }}
-                  className="w-full sm:flex-1 py-5 bg-[#d4af37] text-black font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl flex items-center justify-center space-x-3 hover:bg-white transition-all shadow-[0_15px_30px_rgba(212,175,55,0.2)]"
+                  className="w-full sm:flex-1 py-5 bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl flex items-center justify-center space-x-3 hover:bg-white/10 transition-all"
                 >
                   <LayoutGrid className="w-4 h-4" />
-                  <span>ভিউ পোর্টফোলিও</span>
+                  <span>গ্যালারি দেখুন</span>
                 </button>
               </div>
             </div>
@@ -182,11 +181,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
                     <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black flex items-center gap-2 ml-2">
                       <Phone className="w-3 h-3" /> WhatsApp Number *
                     </label>
-                    <input required name="whatsapp" type="tel" value={formData.whatsapp} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="e.g. +880123456789" />
+                    <input required name="whatsapp" type="tel" value={formData.whatsapp} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="e.g. +88016xxxxxxxx" />
                   </div>
                   <div className="space-y-4">
                     <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black flex items-center gap-2 ml-2">
-                      <Briefcase className="w-3 h-3" /> Company Name
+                      <Briefcase className="w-3 h-3" /> Company / Brand
                     </label>
                     <input name="companyName" type="text" value={formData.companyName} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="Optional" />
                   </div>
@@ -197,31 +196,31 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
                 <div className="space-y-10 animate-fadeIn">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-4">
-                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Category</label>
-                      <select name="category" value={formData.category} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] outline-none text-sm appearance-none">
+                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Service Discipline</label>
+                      <select name="category" value={formData.category} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] outline-none text-sm appearance-none cursor-pointer">
                         {Object.values(Category).map(cat => <option key={cat} value={cat}>{cat}</option>)}
                       </select>
                     </div>
                     <div className="space-y-4">
-                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Subcategory</label>
-                      <select name="subCategory" value={formData.subCategory} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] outline-none text-sm appearance-none">
+                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Specific Type</label>
+                      <select name="subCategory" value={formData.subCategory} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] outline-none text-sm appearance-none cursor-pointer">
                         {subCategories.map(sub => <option key={sub} value={sub}>{sub}</option>)}
                       </select>
                     </div>
                   </div>
                   <div className="space-y-4">
-                    <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Project Title *</label>
-                    <input required name="projectTitle" type="text" value={formData.projectTitle} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="e.g. Modern Gaming Thumbnail" />
+                    <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Project Subject *</label>
+                    <input required name="projectTitle" type="text" value={formData.projectTitle} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="e.g. Modern Minimalist Branding" />
                   </div>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center px-2">
-                       <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black">Detailed Brief *</label>
+                       <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black">Detailed Design Brief *</label>
                        <button type="button" onClick={handleAiHelp} disabled={isLoadingAi} className="text-[9px] font-black text-[#d4af37] flex items-center space-x-2 bg-[#d4af37]/5 px-4 py-1.5 rounded-full hover:bg-[#d4af37]/10 transition-all disabled:opacity-50">
                          <Sparkles className={`w-3 h-3 ${isLoadingAi ? 'animate-spin' : ''}`} /> 
-                         <span>{isLoadingAi ? 'GENERATING...' : 'AI SUGGESTIONS'}</span>
+                         <span>{isLoadingAi ? 'GENERATING...' : 'AI BRIEFER'}</span>
                        </button>
                     </div>
-                    <textarea required name="details" value={formData.details} onChange={handleInputChange} rows={4} className="w-full bg-black border border-white/10 rounded-3xl px-6 py-6 focus:border-[#d4af37] transition-all outline-none text-sm resize-none placeholder:text-gray-800 leading-relaxed" placeholder="Tell me about your vision, color preferences, and what you want to achieve..." />
+                    <textarea required name="details" value={formData.details} onChange={handleInputChange} rows={5} className="w-full bg-black border border-white/10 rounded-3xl px-6 py-6 focus:border-[#d4af37] transition-all outline-none text-sm resize-none placeholder:text-gray-800 leading-relaxed" placeholder="Please describe your vision, colors, and expectations in detail..." />
                   </div>
                 </div>
               )}
@@ -230,22 +229,24 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
                 <div className="space-y-10 animate-fadeIn">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-4">
-                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Preferred Size</label>
-                      <input name="preferredSize" type="text" value={formData.preferredSize} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="e.g. 1920x1080 or A4" />
+                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Preferred Dimensions</label>
+                      <input name="preferredSize" type="text" value={formData.preferredSize} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="e.g. 1920x1080px or A4" />
                     </div>
                     <div className="space-y-4">
-                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Target Deadline</label>
+                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Delivery Deadline</label>
                       <input name="deadline" type="date" value={formData.deadline} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm text-gray-500" />
                     </div>
                   </div>
-                  <div className="p-16 border-2 border-dashed border-white/10 rounded-[2.5rem] flex flex-col items-center justify-center space-y-4 hover:border-[#d4af37] transition-all cursor-pointer bg-white/2 relative group">
-                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-[#d4af37]/10 transition-colors">
-                      <Upload className={`w-8 h-8 ${formData.referenceFile ? 'text-green-500' : 'text-gray-500'}`} />
+                  <div className="p-20 border-2 border-dashed border-white/10 rounded-[3rem] flex flex-col items-center justify-center space-y-6 hover:border-[#d4af37] transition-all cursor-pointer bg-white/2 relative group">
+                    <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center group-hover:bg-[#d4af37]/10 transition-colors">
+                      <Upload className={`w-10 h-10 ${formData.referenceFile ? 'text-green-500' : 'text-gray-500'}`} />
                     </div>
-                    <p className={`text-xs uppercase font-black tracking-[0.2em] ${formData.referenceFile ? 'text-green-500' : 'text-gray-400'}`}>
-                      {formData.referenceFile ? 'Asset Selected Successfully' : 'Drop Reference Asset Here'}
-                    </p>
-                    <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">Supports PNG, JPG (Max 5MB)</span>
+                    <div className="text-center">
+                      <p className={`text-sm uppercase font-black tracking-[0.2em] mb-2 ${formData.referenceFile ? 'text-green-500' : 'text-gray-400'}`}>
+                        {formData.referenceFile ? 'Reference Synced' : 'Sync Reference Asset'}
+                      </p>
+                      <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">Supports High-Res JPG, PNG (Max 5MB)</span>
+                    </div>
                     <input type="file" accept="image/*" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
                   </div>
                 </div>
@@ -254,25 +255,24 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
               {step === 4 && (
                 <div className="space-y-12 animate-fadeIn max-w-2xl mx-auto">
                   <div className="text-center">
-                    <h5 className="font-serif italic text-3xl mb-4 gold-text">Final Confirmation</h5>
-                    <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Please review all data points before submission.</p>
+                    <h5 className="font-serif italic text-4xl mb-4 gold-text">Final Review</h5>
+                    <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Please verify the integrity of your request data.</p>
                   </div>
                   
-                  <div className="bg-black/40 border border-white/5 rounded-3xl p-8 space-y-6">
-                    <div className="flex items-start space-x-5 cursor-pointer group">
-                      <div className="relative">
-                        <input type="checkbox" id="terms" checked={formData.agreedToTerms} onChange={(e) => setFormData({...formData, agreedToTerms: e.target.checked})} className="w-6 h-6 border-2 border-[#d4af37] rounded-lg appearance-none checked:bg-[#d4af37] checked:border-[#d4af37] transition-all cursor-pointer" />
-                        {/* Fixed CheckCircle to CheckCircle2 to match imported component name */}
-                        <CheckCircle2 className={`absolute top-1 left-1 w-4 h-4 text-black pointer-events-none transition-opacity ${formData.agreedToTerms ? 'opacity-100' : 'opacity-0'}`} />
+                  <div className="bg-black/40 border border-white/5 rounded-[2.5rem] p-10 space-y-8">
+                    <div className="flex items-start space-x-6 cursor-pointer group">
+                      <div className="relative mt-1">
+                        <input type="checkbox" id="terms" checked={formData.agreedToTerms} onChange={(e) => setFormData({...formData, agreedToTerms: e.target.checked})} className="w-7 h-7 border-2 border-[#d4af37] rounded-xl appearance-none checked:bg-[#d4af37] checked:border-[#d4af37] transition-all cursor-pointer shadow-lg" />
+                        <CheckCircle2 className={`absolute top-1 left-1 w-5 h-5 text-black pointer-events-none transition-opacity ${formData.agreedToTerms ? 'opacity-100' : 'opacity-0'}`} />
                       </div>
-                      <label htmlFor="terms" className="text-xs text-gray-400 leading-relaxed cursor-pointer group-hover:text-white transition-colors">
-                        I confirm that all project details provided are accurate and I agree to the terms of service of DesignGold Studio.
+                      <label htmlFor="terms" className="text-[13px] text-gray-400 leading-relaxed cursor-pointer group-hover:text-white transition-colors">
+                        I confirm that the design brief is accurate and I agree to initiate this creative commission under DesignGold terms.
                       </label>
                     </div>
                   </div>
 
-                  <button type="submit" disabled={!formData.agreedToTerms || isSubmitting} className="w-full py-7 bg-[#d4af37] text-black font-black uppercase tracking-[0.4em] text-xs rounded-[2rem] hover:bg-white hover:scale-[1.02] transition-all disabled:opacity-20 shadow-[0_20px_40px_rgba(212,175,55,0.2)]">
-                    {isSubmitting ? 'ENCRYPTING DATA...' : 'LAUNCH COMMISSION'}
+                  <button type="submit" disabled={!formData.agreedToTerms || isSubmitting} className="w-full py-8 bg-[#d4af37] text-black font-black uppercase tracking-[0.4em] text-xs rounded-[2rem] hover:bg-white hover:scale-[1.02] transition-all disabled:opacity-20 shadow-[0_20px_40px_rgba(212,175,55,0.2)]">
+                    {isSubmitting ? 'ENCRYPTING & SENDING...' : 'TRANSMIT COMMISSION'}
                   </button>
                 </div>
               )}
