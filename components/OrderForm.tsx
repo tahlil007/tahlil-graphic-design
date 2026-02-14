@@ -3,7 +3,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Category, OrderData, OrderStatus } from '../types.ts';
 import { SUB_CATEGORIES } from '../constants.ts';
 import { orderService } from '../services/orderService.ts';
-import { Send, Sparkles, CheckCircle2, ChevronRight, ChevronLeft, MessageCircle, Upload, Briefcase, User, PenTool, CheckCircle, X, File, ArrowLeft, LayoutGrid } from 'lucide-react';
+// Added Briefcase to imports to resolve "Cannot find name 'Briefcase'" error
+import { Send, Sparkles, CheckCircle2, ChevronRight, MessageCircle, Upload, X, ArrowLeft, LayoutGrid, Mail, User, Phone, Briefcase } from 'lucide-react';
 import { getProjectBriefSuggestions } from '../services/geminiService.ts';
 
 interface OrderFormProps {
@@ -104,24 +105,14 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
   const nextStep = () => setStep(s => Math.min(s + 1, 4));
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
-  const handleBackToOrder = () => {
-    resetForm();
-  };
-
-  const handleViewPortfolio = () => {
-    onClose();
-    resetForm();
-    window.location.hash = '#portfolio';
-  };
-
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => { if(isSuccess) resetForm(); onClose(); }}></div>
+      <div className="absolute inset-0 bg-black/95 backdrop-blur-md" onClick={() => { if(isSuccess) resetForm(); onClose(); }}></div>
       
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[#0f0f0f] border border-white/10 rounded-[2rem] shadow-2xl animate-modalPop custom-scrollbar">
-        <div className="sticky top-0 z-20 flex justify-between items-center p-8 bg-[#0f0f0f]/80 backdrop-blur-sm border-b border-white/5">
+      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] shadow-2xl animate-modalPop custom-scrollbar">
+        <div className="sticky top-0 z-20 flex justify-between items-center p-8 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/5">
           <div>
             <h4 className="text-[#d4af37] uppercase tracking-[0.4em] text-[10px] font-black mb-1">Commission Request</h4>
             <h3 className="text-2xl font-serif italic">Launch Your Project</h3>
@@ -144,14 +135,14 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6 max-w-lg mx-auto">
                 <button 
-                  onClick={handleBackToOrder}
+                  onClick={resetForm}
                   className="w-full sm:flex-1 py-5 bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl flex items-center justify-center space-x-3 hover:bg-white/10 transition-all"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>ব্যাক</span>
                 </button>
                 <button 
-                  onClick={handleViewPortfolio}
+                  onClick={() => { onClose(); resetForm(); window.location.hash = '#portfolio'; }}
                   className="w-full sm:flex-1 py-5 bg-[#d4af37] text-black font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl flex items-center justify-center space-x-3 hover:bg-white transition-all shadow-[0_15px_30px_rgba(212,175,55,0.2)]"
                 >
                   <LayoutGrid className="w-4 h-4" />
@@ -160,93 +151,143 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {step === 1 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fadeIn">
-                  <div className="space-y-3">
-                    <label className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-black">Full Name *</label>
-                    <input required name="name" type="text" value={formData.name} onChange={handleInputChange} className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 focus:border-[#d4af37] transition-all outline-none" />
+            <form onSubmit={handleSubmit} className="space-y-10">
+              {/* Step Indicators */}
+              <div className="flex items-center justify-between mb-12 max-w-md mx-auto">
+                {[1, 2, 3, 4].map((s) => (
+                  <div key={s} className="flex items-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${step >= s ? 'border-[#d4af37] bg-[#d4af37] text-black shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'border-white/10 text-gray-500'}`}>
+                      <span className="text-xs font-black">{s}</span>
+                    </div>
+                    {s < 4 && <div className={`w-8 h-0.5 mx-2 ${step > s ? 'bg-[#d4af37]' : 'bg-white/10'}`}></div>}
                   </div>
-                  <div className="space-y-3">
-                    <label className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-black">WhatsApp Number *</label>
-                    <input required name="whatsapp" type="tel" value={formData.whatsapp} onChange={handleInputChange} className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 focus:border-[#d4af37] transition-all outline-none" />
+                ))}
+              </div>
+
+              {step === 1 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 animate-fadeIn">
+                  <div className="space-y-4">
+                    <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black flex items-center gap-2 ml-2">
+                      <User className="w-3 h-3" /> Full Name *
+                    </label>
+                    <input required name="name" type="text" value={formData.name} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="e.g. Tahlil Ahmed" />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black flex items-center gap-2 ml-2">
+                      <Mail className="w-3 h-3" /> Email Address *
+                    </label>
+                    <input required name="email" type="email" value={formData.email} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="e.g. info@company.com" />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black flex items-center gap-2 ml-2">
+                      <Phone className="w-3 h-3" /> WhatsApp Number *
+                    </label>
+                    <input required name="whatsapp" type="tel" value={formData.whatsapp} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="e.g. +880123456789" />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black flex items-center gap-2 ml-2">
+                      <Briefcase className="w-3 h-3" /> Company Name
+                    </label>
+                    <input name="companyName" type="text" value={formData.companyName} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="Optional" />
                   </div>
                 </div>
               )}
 
               {step === 2 && (
-                <div className="space-y-8 animate-fadeIn">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-3">
-                      <label className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-black">Category</label>
-                      <select name="category" value={formData.category} onChange={handleInputChange} className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 focus:border-[#d4af37] outline-none">
+                <div className="space-y-10 animate-fadeIn">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-4">
+                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Category</label>
+                      <select name="category" value={formData.category} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] outline-none text-sm appearance-none">
                         {Object.values(Category).map(cat => <option key={cat} value={cat}>{cat}</option>)}
                       </select>
                     </div>
-                    <div className="space-y-3">
-                      <label className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-black">Subcategory</label>
-                      <select name="subCategory" value={formData.subCategory} onChange={handleInputChange} className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 focus:border-[#d4af37] outline-none">
+                    <div className="space-y-4">
+                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Subcategory</label>
+                      <select name="subCategory" value={formData.subCategory} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] outline-none text-sm appearance-none">
                         {subCategories.map(sub => <option key={sub} value={sub}>{sub}</option>)}
                       </select>
                     </div>
                   </div>
-                  <div className="space-y-3">
-                    <label className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-black">Project Title *</label>
-                    <input required name="projectTitle" type="text" value={formData.projectTitle} onChange={handleInputChange} className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 focus:border-[#d4af37] transition-all outline-none" />
+                  <div className="space-y-4">
+                    <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Project Title *</label>
+                    <input required name="projectTitle" type="text" value={formData.projectTitle} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="e.g. Modern Gaming Thumbnail" />
                   </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                       <label className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-black">Project Details *</label>
-                       <button type="button" onClick={handleAiHelp} disabled={isLoadingAi} className="text-[8px] font-black text-[#d4af37] flex items-center space-x-1 hover:text-white transition-colors disabled:opacity-50">
-                         <Sparkles className={`w-3 h-3 ${isLoadingAi ? 'animate-spin' : ''}`} /> <span>{isLoadingAi ? 'GENERATING...' : 'AI HELP'}</span>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center px-2">
+                       <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black">Detailed Brief *</label>
+                       <button type="button" onClick={handleAiHelp} disabled={isLoadingAi} className="text-[9px] font-black text-[#d4af37] flex items-center space-x-2 bg-[#d4af37]/5 px-4 py-1.5 rounded-full hover:bg-[#d4af37]/10 transition-all disabled:opacity-50">
+                         <Sparkles className={`w-3 h-3 ${isLoadingAi ? 'animate-spin' : ''}`} /> 
+                         <span>{isLoadingAi ? 'GENERATING...' : 'AI SUGGESTIONS'}</span>
                        </button>
                     </div>
-                    <textarea required name="details" value={formData.details} onChange={handleInputChange} rows={3} className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 focus:border-[#d4af37] transition-all outline-none resize-none" />
+                    <textarea required name="details" value={formData.details} onChange={handleInputChange} rows={4} className="w-full bg-black border border-white/10 rounded-3xl px-6 py-6 focus:border-[#d4af37] transition-all outline-none text-sm resize-none placeholder:text-gray-800 leading-relaxed" placeholder="Tell me about your vision, color preferences, and what you want to achieve..." />
                   </div>
                 </div>
               )}
 
               {step === 3 && (
-                <div className="space-y-8 animate-fadeIn">
-                   <div className="grid grid-cols-2 gap-8">
-                    <div className="space-y-3">
-                      <label className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-black">Preferred Size</label>
-                      <input name="preferredSize" type="text" value={formData.preferredSize} onChange={handleInputChange} className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 focus:border-[#d4af37] transition-all outline-none" />
+                <div className="space-y-10 animate-fadeIn">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-4">
+                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Preferred Size</label>
+                      <input name="preferredSize" type="text" value={formData.preferredSize} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm placeholder:text-gray-800" placeholder="e.g. 1920x1080 or A4" />
                     </div>
-                    <div className="space-y-3">
-                      <label className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-black">Deadline</label>
-                      <input name="deadline" type="date" value={formData.deadline} onChange={handleInputChange} className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 focus:border-[#d4af37] transition-all outline-none" />
+                    <div className="space-y-4">
+                      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-black ml-2">Target Deadline</label>
+                      <input name="deadline" type="date" value={formData.deadline} onChange={handleInputChange} className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 focus:border-[#d4af37] transition-all outline-none text-sm text-gray-500" />
                     </div>
                   </div>
-                  <div className="p-10 border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center space-y-3 hover:border-[#d4af37] transition-all cursor-pointer bg-white/2 relative">
-                    <Upload className="w-6 h-6 text-gray-500" />
-                    <p className="text-[10px] uppercase font-black tracking-widest">
-                      {formData.referenceFile ? 'File Selected' : 'Upload Reference File'}
+                  <div className="p-16 border-2 border-dashed border-white/10 rounded-[2.5rem] flex flex-col items-center justify-center space-y-4 hover:border-[#d4af37] transition-all cursor-pointer bg-white/2 relative group">
+                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-[#d4af37]/10 transition-colors">
+                      <Upload className={`w-8 h-8 ${formData.referenceFile ? 'text-green-500' : 'text-gray-500'}`} />
+                    </div>
+                    <p className={`text-xs uppercase font-black tracking-[0.2em] ${formData.referenceFile ? 'text-green-500' : 'text-gray-400'}`}>
+                      {formData.referenceFile ? 'Asset Selected Successfully' : 'Drop Reference Asset Here'}
                     </p>
-                    <input type="file" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                    <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">Supports PNG, JPG (Max 5MB)</span>
+                    <input type="file" accept="image/*" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
                   </div>
                 </div>
               )}
 
               {step === 4 && (
-                <div className="space-y-10 animate-fadeIn">
-                  <div className="bg-black p-6 rounded-2xl border border-white/5">
-                    <h5 className="font-serif italic text-xl mb-2">Final Review</h5>
-                    <p className="text-[10px] text-gray-500 uppercase font-black">Please confirm your request details.</p>
+                <div className="space-y-12 animate-fadeIn max-w-2xl mx-auto">
+                  <div className="text-center">
+                    <h5 className="font-serif italic text-3xl mb-4 gold-text">Final Confirmation</h5>
+                    <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Please review all data points before submission.</p>
                   </div>
-                  <div className="flex items-start space-x-4 cursor-pointer">
-                    <input type="checkbox" id="terms" checked={formData.agreedToTerms} onChange={(e) => setFormData({...formData, agreedToTerms: e.target.checked})} className="mt-1 w-5 h-5 accent-[#d4af37]" />
-                    <label htmlFor="terms" className="text-[10px] text-gray-500 leading-relaxed">I agree to the terms and conditions of this commission.</label>
+                  
+                  <div className="bg-black/40 border border-white/5 rounded-3xl p-8 space-y-6">
+                    <div className="flex items-start space-x-5 cursor-pointer group">
+                      <div className="relative">
+                        <input type="checkbox" id="terms" checked={formData.agreedToTerms} onChange={(e) => setFormData({...formData, agreedToTerms: e.target.checked})} className="w-6 h-6 border-2 border-[#d4af37] rounded-lg appearance-none checked:bg-[#d4af37] checked:border-[#d4af37] transition-all cursor-pointer" />
+                        {/* Fixed CheckCircle to CheckCircle2 to match imported component name */}
+                        <CheckCircle2 className={`absolute top-1 left-1 w-4 h-4 text-black pointer-events-none transition-opacity ${formData.agreedToTerms ? 'opacity-100' : 'opacity-0'}`} />
+                      </div>
+                      <label htmlFor="terms" className="text-xs text-gray-400 leading-relaxed cursor-pointer group-hover:text-white transition-colors">
+                        I confirm that all project details provided are accurate and I agree to the terms of service of DesignGold Studio.
+                      </label>
+                    </div>
                   </div>
-                  <button type="submit" disabled={!formData.agreedToTerms || isSubmitting} className="w-full py-6 bg-[#d4af37] text-black font-black uppercase tracking-[0.4em] text-xs rounded-2xl hover:bg-white transition-all disabled:opacity-20 shadow-xl">
-                    {isSubmitting ? 'PROCESSING...' : 'CONFIRM ORDER'}
+
+                  <button type="submit" disabled={!formData.agreedToTerms || isSubmitting} className="w-full py-7 bg-[#d4af37] text-black font-black uppercase tracking-[0.4em] text-xs rounded-[2rem] hover:bg-white hover:scale-[1.02] transition-all disabled:opacity-20 shadow-[0_20px_40px_rgba(212,175,55,0.2)]">
+                    {isSubmitting ? 'ENCRYPTING DATA...' : 'LAUNCH COMMISSION'}
                   </button>
                 </div>
               )}
 
-              <div className="flex justify-between items-center pt-8 border-t border-white/5">
-                <button type="button" onClick={prevStep} className={`text-[10px] uppercase font-black tracking-widest ${step === 1 ? 'opacity-0' : 'text-gray-500 hover:text-white'}`}>Back</button>
-                {step < 4 && <button type="button" onClick={nextStep} className="text-[10px] uppercase font-black tracking-widest text-[#d4af37] hover:text-white">Next Step</button>}
+              <div className="flex justify-between items-center pt-10 border-t border-white/5">
+                <button type="button" onClick={prevStep} className={`flex items-center space-x-3 text-[10px] uppercase font-black tracking-widest ${step === 1 ? 'opacity-0 pointer-events-none' : 'text-gray-500 hover:text-white transition-colors'}`}>
+                  <ChevronRight className="w-4 h-4 rotate-180" />
+                  <span>Previous</span>
+                </button>
+                {step < 4 && (
+                  <button type="button" onClick={nextStep} className="flex items-center space-x-3 text-[10px] uppercase font-black tracking-widest text-[#d4af37] hover:text-white transition-colors">
+                    <span>Continue</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </form>
           )}
