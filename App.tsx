@@ -9,6 +9,7 @@ import Contact from './components/Contact.tsx';
 import Footer from './components/Footer.tsx';
 import AdminLogin from './components/AdminLogin.tsx';
 import AdminDashboard from './components/AdminDashboard.tsx';
+import { orderService } from './services/orderService.ts';
 
 type View = 'portfolio' | 'admin-login' | 'admin-dashboard';
 
@@ -16,6 +17,29 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('portfolio');
   const [isOrderModalOpen, setOrderModalOpen] = useState(false);
   const [lastActivity, setLastActivity] = useState(Date.now());
+
+  // Detect and Import Orders from URL (Smart Sync)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const importData = params.get('importOrder');
+    
+    if (importData) {
+      try {
+        const decodedOrder = JSON.parse(atob(importData));
+        orderService.importOrder(decodedOrder);
+        
+        // Clear the URL parameter without refreshing the page
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+        
+        // Switch to Admin view to show the imported order
+        setCurrentView('admin-login');
+        alert("New order synchronized successfully! Please login to view.");
+      } catch (e) {
+        console.error("Failed to sync order:", e);
+      }
+    }
+  }, []);
 
   // Auto-logout simulation after 15 minutes of inactivity
   useEffect(() => {

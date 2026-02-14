@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Category, OrderData, OrderStatus } from '../types.ts';
 import { SUB_CATEGORIES } from '../constants.ts';
 import { orderService } from '../services/orderService.ts';
-import { Send, Sparkles, CheckCircle2, ChevronRight, ChevronLeft, MessageCircle, Upload, Briefcase, User, PenTool, CheckCircle, X, File } from 'lucide-react';
+import { Send, Sparkles, CheckCircle2, ChevronRight, ChevronLeft, MessageCircle, Upload, Briefcase, User, PenTool, CheckCircle, X, File, Copy, Check } from 'lucide-react';
 import { getProjectBriefSuggestions } from '../services/geminiService.ts';
 
 interface OrderFormProps {
@@ -35,6 +35,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [aiBrief, setAiBrief] = useState<string | null>(null);
   const [isLoadingAi, setIsLoadingAi] = useState(false);
+  const [lastSavedOrder, setLastSavedOrder] = useState<OrderData | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -92,33 +94,39 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
     
     setIsSubmitting(true);
     setTimeout(() => {
-      // Note: Data is saved to localStorage (browser-specific)
-      orderService.saveOrder(formData);
+      const saved = orderService.saveOrder(formData);
+      setLastSavedOrder(saved);
       setIsSubmitting(false);
       setIsSuccess(true);
     }, 1500);
   };
 
+  const getSyncCode = () => {
+    return lastSavedOrder ? btoa(JSON.stringify(lastSavedOrder)) : '';
+  };
+
+  const handleCopyCode = () => {
+    const code = getSyncCode();
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const generateWhatsAppUrl = () => {
-    const adminPhone = "YOUR_WHATSAPP_NUMBER_HERE"; // Replace with your actual WhatsApp number
+    const syncData = getSyncCode();
+    const syncLink = `${window.location.origin}${window.location.pathname}?importOrder=${syncData}`;
+
     const message = `*NEW ORDER RECEIVED - DESIGNGOLD*%0A%0A` +
       `*Client Info:*%0A` +
       `- Name: ${formData.name}%0A` +
-      `- Email: ${formData.email}%0A` +
-      `- WhatsApp: ${formData.whatsapp}%0A` +
-      `- Brand: ${formData.companyName || 'N/A'}%0A%0A` +
+      `- WhatsApp: ${formData.whatsapp}%0A%0A` +
       `*Project Info:*%0A` +
       `- Title: ${formData.projectTitle}%0A` +
-      `- Service: ${formData.category} (${formData.subCategory})%0A` +
-      `- Deadline: ${formData.deadline}%0A` +
-      `- Budget: ${formData.budgetRange || 'Flexible'}%0A%0A` +
-      `*Project Brief:*%0A${formData.details}%0A%0A` +
-      `*Design Specs:*%0A` +
-      `- Size: ${formData.preferredSize || 'Standard'}%0A` +
-      `- Colors: ${formData.colorPreference || 'Open'}%0A` +
-      `- Content: ${formData.textContent || 'See attachments'}`;
+      `- Service: ${formData.category}%0A%0A` +
+      `*Sync Link for Computer Dashboard:*%0A${syncLink}`;
     
-    return `https://wa.me/your_number_here?text=${message}`; // Replace with your number in format: 88017XXXXXXXX
+    // Replace this with your actual phone number to receive messages directly
+    return `https://wa.me/8801735706240?text=${message}`; 
   };
 
   const nextStep = () => {
@@ -189,9 +197,9 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
               <div className="w-24 h-24 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
                 <CheckCircle2 className="w-12 h-12 text-[#d4af37]" />
               </div>
-              <h4 className="text-3xl font-serif italic mb-4">অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!</h4>
+              <h4 className="text-3xl font-serif italic mb-4 text-white">অর্ডার সফলভাবে সম্পন্ন হয়েছে!</h4>
               <p className="text-gray-400 mb-10 max-w-sm mx-auto leading-relaxed text-sm">
-                আপনার অর্ডারের বিস্তারিত এখন আমাদের WhatsApp-এ পাঠিয়ে দিন যাতে আমরা সাথে সাথে কাজ শুরু করতে পারি।
+                অর্ডারটি ডিজাইনারের কম্পিউটারে পাঠানোর জন্য নিচের বাটনে ক্লিক করুন। 
               </p>
               
               <div className="space-y-4 max-w-md mx-auto">
@@ -202,8 +210,21 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
                   className="w-full py-6 bg-green-600 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl flex items-center justify-center space-x-4 hover:bg-green-500 hover:scale-[1.02] transition-all shadow-[0_20px_40px_rgba(22,163,74,0.3)]"
                 >
                   <MessageCircle className="w-6 h-6" />
-                  <span>Notify via WhatsApp (Admin)</span>
+                  <span>Notify via WhatsApp</span>
                 </a>
+
+                <div className="relative group">
+                  <button 
+                    onClick={handleCopyCode}
+                    className="w-full py-5 bg-neutral-900 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center space-x-4 border border-white/10 hover:border-[#d4af37] transition-all"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-[#d4af37]" />}
+                    <span>{copied ? 'ORDER CODE COPIED' : 'COPY ORDER SYNC CODE'}</span>
+                  </button>
+                  <p className="mt-2 text-[9px] text-gray-600 uppercase tracking-widest leading-relaxed">
+                    If WhatsApp link doesn't work, copy this code and send it manually.
+                  </p>
+                </div>
                 
                 <button 
                   onClick={onClose}
@@ -212,10 +233,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
                   Close & Return to Site
                 </button>
               </div>
-              
-              <p className="mt-8 text-[9px] text-gray-600 uppercase tracking-widest leading-relaxed">
-                Note: Local data saved successfully. <br/> Cross-device sync requires WhatsApp notification.
-              </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-8">
@@ -359,9 +376,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
                       {isSubmitting ? <Sparkles className="animate-spin w-5 h-5" /> : <Send className="w-5 h-5" />}
                       <span>{isSubmitting ? 'SENDING...' : 'PLACE ORDER'}</span>
                     </button>
-                    <p className="text-center text-[8px] text-gray-600 uppercase tracking-widest font-black">
-                      Note: You will be asked to send a WhatsApp message to finalize.
-                    </p>
                   </div>
                 </div>
               )}
